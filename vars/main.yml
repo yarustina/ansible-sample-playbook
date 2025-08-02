@@ -1,0 +1,2 @@
+webroot_path: /var/www/my_site
+log_format_name: 228

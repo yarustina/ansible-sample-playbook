@@ -1,0 +1,19 @@
+---
+- name: Create a script for restoring fw
+  copy:
+    src: files/restore-fw.sh
+    dest: /usr/local/bin/restore-fw.sh
+    mode: 0755
+
+- name: Creation and activation of systemd-unit service for the script
+  copy:
+    src: files/firewall-restore.service
+    dest: /etc/systemd/system/firewall-restore.service
+    mode: 0644
+
+- name: Reload systemd and start unit
+  systemd:
+    daemon_reload: true
+    name: firewall-restore.service
+    enabled: true
+    state: started

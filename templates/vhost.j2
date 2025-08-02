@@ -1,0 +1,38 @@
+server {
+    listen 80;
+    server_name {{ domain }};
+
+{% if not cert_stat.stat.exists %}
+    root /var/www/my_site;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ =404;
+               }
+
+    access_log /var/log/nginx/{{ domain }}-access.log {{ log_format_name }};
+{% endif %}
+
+{% if cert_stat.stat.exists %}
+    return 301 https://$host$request_uri;
+{% endif %}
+}
+
+{% if cert_stat.stat.exists %}
+server {
+    listen 443 ssl;
+    server_name {{ domain }};
+
+    root /var/www/my_site;
+    index index.html;
+
+    ssl_certificate /etc/letsencrypt/live/{{ domain }}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{{ domain }}/privkey.pem;
+
+    location / {
+        try_files $uri $uri/ =404;
+               }
+
+    access_log /var/log/nginx/{{ domain }}-access.log {{ log_format_name }};
+}
+{% endif %}
