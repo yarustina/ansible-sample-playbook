@@ -1,0 +1,6 @@
+---
+- name: Add the user 'director' with a home directory
+  user:
+    name: director
+    create_home: true
+    groups: www-data

@@ -1,0 +1,14 @@
+*raw
+COMMIT
+*filter
+:INPUT ACCEPT [0:0]
+-A INPUT -p tcp -m tcp --dport 80 -j ACCEPT
+-A INPUT -p tcp -m tcp --dport 443 -j ACCEPT
+-A INPUT -p tcp -m tcp --dport 2220 -j ACCEPT
+-A INPUT -m set --match-set whitelist src -j ACCEPT
+-A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+-A INPUT -j DROP
+COMMIT
+*nat
+:INPUT ACCEPT [6888:399044]
+COMMIT

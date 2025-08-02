@@ -1,0 +1,75 @@
+---
+- name: Check if the cert exists
+  stat:
+    path: /etc/letsencrypt/live/{{ domain }}/fullchain.pem
+  register: cert_stat
+
+- name: Install Nginx
+  apt:
+    name: nginx
+    state: present
+    update_cache: true
+  when: not cert_stat.stat.exists
+  tags: nginx
+
+- name: Setup log-format Nginx
+  template:
+    src: log_format.conf.j2
+    dest: /etc/nginx/conf.d/log_format.conf
+  notify: Reload nginx
+  tags: log_form
+
+- name: Delete the default virtual host
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+
+- name: Mkdir /var/www/my_site
+  file:
+    path: "{{ webroot_path }}"
+    state: directory
+
+- name: Copy index.html
+  copy:
+    src: files/index.html
+    dest: "{{ webroot_path }}/index.html"
+    owner: www-data
+    group: www-data
+    mode: 0640
+
+- name: Copy vhost config
+  template:
+    src: vhost.j2
+    dest: /etc/nginx/sites-available/my_site
+
+- name: Create a symlinc
+  file:
+    src: /etc/nginx/sites-available/my_site
+    dest: /etc/nginx/sites-enabled/my_site
+    state: link
+  notify: Reload nginx
+
+- name: Install Certbot
+  apt:
+    name: certbot
+    state: present
+    update_cache: true
+
+- name: Issue cert if missing
+  shell: certbot certonly --webroot -w {{ webroot_path }} -d {{ domain }} --email nobody@poop.com --agree-tos --non-interactive
+  when: not cert_stat.stat.exists
+
+- name: Copy vhost config after certification
+  template:
+    src: vhost.j2
+    dest: /etc/nginx/sites-available/my_site
+  when: not cert_stat.stat.exists
+
+- name: Check the certificate end date if it's already up
+  shell: echo $(( (`date -d "$(echo | openssl s_client -servername {{ domain }} -connect {{ domain }}:443 2>/dev/null | openssl x509 -noout -enddate | cut -d "=" -f 2)" +%s` - `date +%s`) / 86400 ))
+  register: cert_end
+
+- name: Renew the cert if it's over
+  command: certbot renew --quiet
+  when: cert_end.stdout | int < 10
+  notify: Reload nginx
