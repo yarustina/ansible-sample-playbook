@@ -1,0 +1,14 @@
+---
+- name: Add authorized_keys file with comments
+  template:
+    src: templates/authorized_keys.j2
+    dest: /root/.ssh/authorized_keys
+
+- name: Copy ssh conf
+  copy:
+    src: files/ssh-conf
+    dest: /etc/ssh/sshd_config
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart ssh

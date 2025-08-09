@@ -1,5 +1,5 @@
 - name: Restart fail2ban
-  service:
+  systemd:
     name: fail2ban
     state: restarted
     enabled: true
@@ -8,3 +8,8 @@
   systemd:
     name: nginx
     state: reloaded
+
+- name: Restart ssh
+  systemd:
+    name: ssh
+    state: restarted

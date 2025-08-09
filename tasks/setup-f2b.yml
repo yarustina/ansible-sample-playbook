@@ -4,7 +4,6 @@
     name: fail2ban
     state: present
     update_cache: true
-  tags: fail2ban
 
 - name: Setup fail2ban
   copy:
@@ -14,4 +13,3 @@
     group: root
     mode: '0644'
   notify: Restart fail2ban
-  tags: fail2ban

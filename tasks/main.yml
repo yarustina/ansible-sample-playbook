@@ -1,15 +1,23 @@
 ---
-- name: STAGE | Add users
-  include_tasks: tasks/add-users.yml
+- name: STAGE | Init tasks
+  import_tasks: tasks/init-tasks.yml
+
+- name: STAGE | Setup ssh
+  import_tasks: tasks/setup-ssh.yml
+  tags: ssh
 
 - name: STAGE | Setup Firewall
-  include_tasks: tasks/setup-fw.yml
+  import_tasks: tasks/setup-fw.yml
 
 - name: STAGE | Add Firewall-restore service
-  include_tasks: tasks/setup-fw-restore.yml
+  import_tasks: tasks/setup-fw-restore.yml
 
 - name: STAGE | Setup Fail2Ban service
-  include_tasks: tasks/setup-f2b.yml
+  import_tasks: tasks/setup-f2b.yml
+  tags: fail2ban
 
 - name: STAGE | Setup Nginx and deploy site-content
   include_tasks: tasks/setup-webserver.yml
+  tags:
+    - nginx
+    - log_form

@@ -1,4 +1,8 @@
 ---
+- name: Set a hostname
+  hostname:
+    name: "{{ inventory_hostname }}"
+
 - name: Add the user 'director' with a home directory
   user:
     name: director
